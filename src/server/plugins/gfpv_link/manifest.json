@@ -1,0 +1,13 @@
+{
+    "name": "GFPV Link",
+    "author": "Arnaud Morin",
+    "author_uri": "https://github.com/arnaudmorin",
+    "description": "GFPV Link Tournament Bracket Visualization",
+    "info_uri": "https://github.com/arnaudmorin/RotorHazardBracket",
+    "license": "APACHE",
+    "license_uri": "https://github.com/arnaudmorin/RotorHazardBracket/blob/main/LICENSE",
+    "version": "0.1.0",
+    "required_rhapi_version": "1.0",
+    "update_uri": null,
+    "text_domain": null
+}
