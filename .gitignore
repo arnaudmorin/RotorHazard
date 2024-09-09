@@ -36,3 +36,4 @@ venv
 # Arnaud adding this plugin in bundle
 !/src/server/plugins/class_rank_best_x_laps/
 !/src/server/plugins/gfpv_link/
+!/src/server/plugins/class_rank_fai/
