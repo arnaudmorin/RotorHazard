@@ -237,10 +237,19 @@ class HeatAutomator:
                                                 eliminated_matches[slot_idx]['slot'].node_index = available_seats[n_idx]['idx']
                                                 available_seats[n_idx] = None
                                                 break
-                                    else:
-                                        # else explicity avoid D-band
+                                    # Stay on O-band if needed
+                                    elif eliminated_matches[slot_idx] \
+                                    and eliminated_matches[slot_idx]['band'] == 'O':
                                         for n_idx, node in enumerate(available_seats):
-                                            if node['frq']['b'] != 'D':
+                                            if node['frq']['b'] == 'O':
+                                                eliminated_matches[slot_idx]['slot'].node_index = available_seats[n_idx]['idx']
+                                                tmp_freq = node['frq']['f']
+                                                available_seats[n_idx] = None
+                                                break
+                                    else:
+                                        # else explicity avoid D and O band
+                                        for n_idx, node in enumerate(available_seats):
+                                            if node['frq']['b'] != 'D' and node['frq']['b'] != 'O':
                                                 eliminated_matches[slot_idx]['slot'].node_index = available_seats[n_idx]['idx']
                                                 available_seats[n_idx] = None
                                                 break
@@ -269,10 +278,17 @@ class HeatAutomator:
                                                     slot.node_index = available_seats[n_idx]['idx']
                                                     available_seats[n_idx] = None
                                                     break
-                                        else:
-                                            # Explicitely avoid D band
+                                        elif prefered_band == 'djio3':
                                             for n_idx, node in enumerate(available_seats):
-                                                if node['frq']['b'] != 'D':
+                                                if node['frq']['b'] == 'O':
+                                                    slot.node_index = available_seats[n_idx]['idx']
+                                                    tmp_freq = node['frq']['f']
+                                                    available_seats[n_idx] = None
+                                                    break
+                                        else:
+                                            # Explicitely avoid D and O band
+                                            for n_idx, node in enumerate(available_seats):
+                                                if node['frq']['b'] != 'D' and node['frq']['b'] != 'O':
                                                     slot.node_index = available_seats[n_idx]['idx']
                                                     available_seats[n_idx] = None
                                                     break
