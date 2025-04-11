@@ -16,6 +16,7 @@ class PilotPreferedBandSelector():
         options=[
             UIFieldSelectOption('raceband', "RACEBAND"),
             UIFieldSelectOption('dji', "DJI"),
+            UIFieldSelectOption('djio3', "DJI O3"),
         ]
         self._rhapi.fields.register_pilot_attribute(
             UIField('prefered_band', "Prefered Band", UIFieldType.SELECT,
