@@ -7,6 +7,7 @@ import RHUtils
 from Database import ProgramMethod, HeatStatus
 from filtermanager import Flt
 from flask import request
+from eventmanager import Evt
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,9 @@ class HeatAutomator:
                         filtered_preassignments[slot] = seat
                         used_seats.append(seat)
                 preassignments = filtered_preassignments
+
+            # Trigger HEAT_AUTOFREQUENCY_INIT event so plugins can prepare nodes
+            self._racecontext.events.trigger(Evt.HEAT_AUTOFREQUENCY_INIT, {'heat_id': heat_id})
 
             self.run_auto_frequency(heat, current_frequencies, num_nodes, calc_fn, preassignments)
 
