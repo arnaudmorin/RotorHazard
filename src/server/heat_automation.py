@@ -6,6 +6,7 @@ import json
 import RHUtils
 from Database import ProgramMethod, HeatStatus
 from flask import request
+from eventmanager import Evt
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,9 @@ class HeatAutomator:
                 calc_fn = self.find_best_slot_node_adaptive
             else:
                 calc_fn = self.find_best_slot_node_basic
+
+            # Trigger HEAT_AUTOFREQUENCY_INIT event so plugins can prepare nodes
+            self._racecontext.events.trigger(Evt.HEAT_AUTOFREQUENCY_INIT, {'heat_id': heat_id})
 
             self.run_auto_frequency(heat, self._racecontext.race.profile.frequencies, self._racecontext.race.num_nodes, calc_fn)
 

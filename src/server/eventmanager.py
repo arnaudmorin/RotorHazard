@@ -126,6 +126,7 @@ class Evt:
     HEAT_ALTER = 'heatAlter'
     HEAT_DELETE = 'heatDelete'
     HEAT_GENERATE = 'heatGenerate'
+    HEAT_AUTOFREQUENCY_INIT = 'heatAutofrequencyInit'
     CLASS_ADD = 'classAdd'
     CLASS_DUPLICATE = 'classDuplicate'
     CLASS_ALTER = 'classAlter'
