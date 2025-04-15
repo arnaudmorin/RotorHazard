@@ -89,6 +89,9 @@ class GFPVAutoFreqs():
 
 
 def initialize(rhapi):
+    ## Disable for now
+    return
+    ##
     gfpvautofreqs = GFPVAutoFreqs(rhapi)
     rhapi.events.on(Evt.STARTUP, gfpvautofreqs.startup)
     # NOTE(arnaud) we need to set a pretty lower priority to make sure the nodes freqs is set before the heat seed is done
