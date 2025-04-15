@@ -32,9 +32,6 @@ venv
 /src/server/static/user/*
 !/src/server/static/user/README.md
 
-# User plugins folder
-/src/server/plugins/*
-
 # macOS
 .DS_Store
 .AppleDouble
