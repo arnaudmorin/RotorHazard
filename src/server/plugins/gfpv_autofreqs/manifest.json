@@ -1,0 +1,13 @@
+{
+    "name": "GFPV Autoset frequencies",
+    "author": "Arnaud Morin",
+    "author_uri": "https://github.com/arnaudmorin",
+    "description": "GFPV Auto set node frequencies",
+    "info_uri": "https://github.com/arnaudmorin/TODO",
+    "license": "APACHE",
+    "license_uri": "https://github.com/arnaudmorin/TODO/blob/main/LICENSE",
+    "version": "0.1.0",
+    "required_rhapi_version": "1.0",
+    "update_uri": null,
+    "text_domain": null
+}
