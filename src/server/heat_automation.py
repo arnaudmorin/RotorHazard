@@ -28,7 +28,7 @@ class HeatAutomator:
                 return 'safe'
 
             if calc_result['calc_success'] is True and calc_result['has_calc_pilots'] is False and not heat.auto_frequency:
-                # Heat has no calc issues, no dynamic slots, and auto-frequnecy is off
+                # Heat has no calc issues, no dynamic slots, and auto-frequency is off
                 return 'safe'
 
             adaptive = bool(self._racecontext.serverconfig.get_item_int('TIMING', 'calibrationMode'))
@@ -232,21 +232,23 @@ class HeatAutomator:
                             'matches': []
                             })
 
-            # get frequency matches from pilots
+            # get band/frequency matches from pilots
             for slot in slots:
                 if slot.pilot_id and slot.node_index is None:
-                    used_frequencies_json = self._racecontext.rhdata.get_pilot(slot.pilot_id).used_frequencies
-                    if used_frequencies_json:
-                        used_frequencies = json.loads(used_frequencies_json)
-                        for node in available_seats:
-                            end_idx = len(used_frequencies) - 1
-                            for f_idx, pilot_freq in enumerate(used_frequencies):
-                                if node['frq']['f'] == pilot_freq['f']:
-                                    node['matches'].append({
+                    pilot = self._racecontext.rhdata.get_pilot(slot.pilot_id)
+                    if pilot and pilot.used_frequencies:
+                        used_frequencies_json = pilot.used_frequencies
+                        if used_frequencies_json:
+                            used_frequencies = json.loads(used_frequencies_json)
+                            for node in available_seats:
+                                end_idx = len(used_frequencies) - 1
+                                for f_idx, pilot_freq in enumerate(used_frequencies):
+                                    if 'b' in pilot_freq and node['frq']['f'] == pilot_freq['f'] and node['frq']['b'] == pilot_freq['b']:
+                                        node['matches'].append({
                                             'slot': slot,
                                             'band': pilot_freq['b'],
                                             'priority': True if f_idx == end_idx else False
-                                         })
+                                        })
 
             eliminated_matches = []
             if callable(calc_fn):
@@ -260,6 +262,8 @@ class HeatAutomator:
                             if slot_match['slot'] != m_slot:
                                 eliminated_matches.append(slot_match)
                         del available_seats[an_idx]
+                        # keep only seats that are not close the the ones we choose
+                        available_seats = [x for x in available_seats if x['frq']['f'] not in range(m_node['frq']['f'] - 10, m_node['frq']['f'] + 10)]
                         for available_node in available_seats:
                             for slot_idx, slot_match in enumerate(available_node['matches']):
                                 if slot_match['slot'] == m_slot:
@@ -274,17 +278,24 @@ class HeatAutomator:
                                 if eliminated_matches[slot_idx]['slot'].node_index is None:
                                     # Stay on D-band if needed
                                     if eliminated_matches[slot_idx] \
-                                    and eliminated_matches[slot_idx]['band'] == 'D' \
-                                    and eliminated_matches[slot_idx]['priority'] == True:
+                                    and eliminated_matches[slot_idx]['band'] == 'D':
                                         for n_idx, node in enumerate(available_seats):
                                             if node['frq']['b'] == 'D':
                                                 eliminated_matches[slot_idx]['slot'].node_index = available_seats[n_idx]['idx']
                                                 available_seats[n_idx] = None
                                                 break
-                                    else:
-                                        # else explicity avoid D-band
+                                    # Stay on O-band if needed
+                                    elif eliminated_matches[slot_idx] \
+                                    and eliminated_matches[slot_idx]['band'] == 'O':
                                         for n_idx, node in enumerate(available_seats):
-                                            if node['frq']['b'] != 'D':
+                                            if node['frq']['b'] == 'O':
+                                                eliminated_matches[slot_idx]['slot'].node_index = available_seats[n_idx]['idx']
+                                                available_seats[n_idx] = None
+                                                break
+                                    else:
+                                        # else explicitly avoid D and O band
+                                        for n_idx, node in enumerate(available_seats):
+                                            if node['frq']['b'] != 'D' and node['frq']['b'] != 'O':
                                                 eliminated_matches[slot_idx]['slot'].node_index = available_seats[n_idx]['idx']
                                                 available_seats[n_idx] = None
                                                 break
@@ -302,12 +313,33 @@ class HeatAutomator:
                                 
                             eliminated_matches = [x for x in eliminated_matches if x is not None]
                         else:
-                            # place pilots with no history into first available slots
+                            # place pilots with no history into best available seats
                             for slot in slots:
+                                preferred_band = self._racecontext.rhdata.get_pilot_attribute_value(slot.pilot_id, 'preferred_band')
                                 if slot.node_index is None and slot.pilot_id:
                                     if len(available_seats):
-                                        slot.node_index = available_seats[0]['idx']
-                                        del(available_seats[0])
+                                        if preferred_band == 'dji':
+                                            for n_idx, node in enumerate(available_seats):
+                                                if node['frq']['b'] == 'D':
+                                                    slot.node_index = available_seats[n_idx]['idx']
+                                                    available_seats[n_idx] = None
+                                                    break
+                                        elif preferred_band == 'djio3':
+                                            for n_idx, node in enumerate(available_seats):
+                                                if node['frq']['b'] == 'O':
+                                                    slot.node_index = available_seats[n_idx]['idx']
+                                                    available_seats[n_idx] = None
+                                                    break
+                                        else:
+                                            # Explicitly avoid D and O band
+                                            for n_idx, node in enumerate(available_seats):
+                                                if node['frq']['b'] != 'D' and node['frq']['b'] != 'O':
+                                                    slot.node_index = available_seats[n_idx]['idx']
+                                                    available_seats[n_idx] = None
+                                                    break
+
+                                        # Remove deleted seats
+                                        available_seats = [x for x in available_seats if x is not None]
                                     else:
                                         logger.warning("Dropping pilot {}; No remaining available nodes for slot {}".format(slot.pilot_id, slot))
                             break
